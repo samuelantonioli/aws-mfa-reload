@@ -101,8 +101,10 @@ def validate_migration(migration: str) -> list[str]:
 
 def decode(otp_auth_url: str):
     """Convert Google Authenticator data to plain otpauth links"""
-    if not "otpauth-migration://" in otp_auth_url:
+    if "otpauth://" in otp_auth_url:
         return pyotp.parse_uri(otp_auth_url).now()
+    if not "otpauth-migration://" in otp_auth_url:
+        return pyotp.TOTP(otp_auth_url).now()
     migration_data = validate_migration(otp_auth_url)
     for payload in decoded_data(data=migration_data):
         migration_payload = Payload()
