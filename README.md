@@ -6,11 +6,11 @@ With `aws_login_reload` you can set your OTP secret in an environment variable a
 ### setting up
 
 ```bash
+git clone git@github.com:samuelantonioli/aws-mfa-reload.git && cd aws-mfa-reload
 python3 -m venv env
 source env/bin/activate
-pip install pyotp protobuf pexpect
-# or
 pip install -r requirements.txt
+echo "$(pwd)/env/bin/python3 aws_login_reload.py" > run.sh && chmod +x run.sh
 ```
 ### running
 
@@ -18,6 +18,6 @@ pip install -r requirements.txt
 export OTP_SECRET="otpauth-migration://offline?data=SECRET_DATA"
 export AWS_PROFILE=aws-profile-name
 export DOCKER_CONTAINER=docker-container-name
-python aws_login_reload.py
+./run.sh
 ```
 

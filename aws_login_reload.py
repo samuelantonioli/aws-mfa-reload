@@ -24,10 +24,10 @@ def start_command_with_input(command, input_data):
     try:
         i = child.expect([pexpect.TIMEOUT, "Enter MFA code"])
     except pexpect.exceptions.EOF:
-        print(child.before)
-        return "assumed-role" in child.before.decode('utf-8')
+        print(child.before.decode("utf-8"))
+        return "assumed-role" in child.before.decode("utf-8")
     child.sendline(input_data)
-    print(child.read().decode('utf-8'))
+    print(child.read().decode("utf-8"))
     return True
 
 
@@ -37,6 +37,8 @@ def restart_docker_container():
 
 
 if __name__ == "__main__":
+    for env in ("OTP_SECRET", "AWS_PROFILE", "DOCKER_CONTAINER"):
+        assert os.getenv(env), f"{env} is not set"
     aws_profile = os.getenv("AWS_PROFILE")
     while True:
         command = f"aws sts get-caller-identity --profile {aws_profile}"
