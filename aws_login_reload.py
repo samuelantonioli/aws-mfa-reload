@@ -24,11 +24,12 @@ def start_command_with_input(command, input_data):
     try:
         i = child.expect([pexpect.TIMEOUT, "Enter MFA code"])
     except pexpect.exceptions.EOF:
+        # still logged in
         print(child.before.decode("utf-8"))
-        return "assumed-role" in child.before.decode("utf-8")
+        return "assumed-role" in child.before.decode("utf-8"), False
     child.sendline(input_data)
     print(child.read().decode("utf-8"))
-    return True
+    return True, True
 
 
 def restart_docker_container():
@@ -42,11 +43,13 @@ if __name__ == "__main__":
     aws_profile = os.getenv("AWS_PROFILE")
     while True:
         command = f"aws sts get-caller-identity --profile {aws_profile}"
-        if start_command_with_input(command, get_otp_code()):
-            restart_docker_container()
+        login_success, need_reload = start_command_with_input(command, get_otp_code())
+        if login_success:
+            if need_reload:
+                restart_docker_container()
             print("Success reloading AWS Login")
-            time.sleep(60 * 5)
+            print("Waiting for next login try ...")
+            time.sleep(30)
         else:
             print("Error running AWS Login")
             break
-        print("Waiting 5 minutes for next login ...")
